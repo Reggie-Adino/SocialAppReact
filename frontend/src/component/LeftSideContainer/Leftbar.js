@@ -11,29 +11,29 @@ import axios from "axios";
 
 const Leftbar = () => {
   const accessToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZDc3YzczNDFlZmE3MzE3MTVhNWQwMiIsInVzZXJuYW1lIjoiam9objkwODEiLCJpYXQiOjE3MTA3NzExMjZ9.lgefVTrf20XIsqkJYfqY0k_A5j2mK5dFGoDwWTNYZ8A";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZDc3YzczNDFlZmE3MzE3MTVhNWQwMiIsInVzZXJuYW1lIjoiam9objkwODEiLCJpYXQiOjE3MTA3NzExMjZ9.lgefVTrf20XIsqkJYfqY0k_A5j2mK5dFGoDwWTNYZ8A";
 
-  const [post, setPost] = useState([]);
+const [post, setPost] = useState([]);
 
-  useEffect(() => {
-    const getPost = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5000/api/user/flw/65d77c7341efa731715a5d02`,
-          {
-            headers: {
-              token: accessToken,
-            },
-          }
-        );
-        setPost(res.data);
-      } catch (error) {}
-    };
+useEffect(() => {
+  const getPost = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/user/flw/65d77c7341efa731715a5d02`,
+        {
+          headers: {
+            token: accessToken,
+          },
+        }
+      );
+      setPost(res.data);
+    } catch (error) {}
+  };
 
-    getPost();
-  }, []);
+  getPost();
+}, []);
 
-  console.log(post);
+console.log(post);
 
   return (
     <div className="Leftbar">

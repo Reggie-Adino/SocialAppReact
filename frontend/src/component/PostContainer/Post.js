@@ -8,7 +8,7 @@ import shareIcon from "../Images/share.png";
 import anotherLikeIcon from "../Images/setLike.png";
 import axios from 'axios'
 
-const Post = ({post}) => {
+const         Post = ({post}) => {
 
 
 
@@ -27,6 +27,8 @@ const Post = ({post}) => {
   
     fetchData(); // Call the async function
   }, []);
+
+
   
   const userId = "65d77c7341efa731715a5d02"
   const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZDc3YzczNDFlZmE3MzE3MTVhNWQwMiIsInVzZXJuYW1lIjoiam9objkwODEiLCJpYXQiOjE3MTA3NzExMjZ9.lgefVTrf20XIsqkJYfqY0k_A5j2mK5dFGoDwWTNYZ8A"
@@ -36,8 +38,8 @@ const Post = ({post}) => {
 
     const [comments, setComments] = useState([])
     const [commentwriting, setCommentWriting] = useState('')
-    const [show, setShow] = useState(false)
-  console.log(post)
+    const [show, setShow] = useState(false);
+    console.log(post)
 
   // function handleLike() {
   //   setLike((prev) => !prev);
@@ -48,13 +50,18 @@ const Post = ({post}) => {
   //   }
   // }
 
+
+
   const handleLike = async() => {
     setLike((prev) => !prev);
-    if (like == LikeIcon) {
-      await fetch(`https://localhost:5000/api/post/${post._id}/like`, {method:'PUT', headers:{'Content-Type':'application/json',token:accessToken}})
-      setCount(count + 1);
+    if (like === LikeIcon) {
+      await fetch(`http://localhost:5000/api/post/${post._id}/like`, {method:'PUT', headers:{'Content-Type':'application/json',token:accessToken}});
+      setLike( anotherLikeIcon );
+      setCount((prevCount) => prevCount + 1);
     } else {
-      setCount(count - 1);
+      await fetch(`http://localhost:5000/api/post/${post._id}/like` , {method:"PUT" , headers:{'Content-Type':"application/Json" , token:accessToken}});
+      setLike(LikeIcon);
+      setCount((prevCount) => prevCount - 1);
     }
   }
 
@@ -86,7 +93,7 @@ const Post = ({post}) => {
         <div className="SubPostContainer">
           <div>
             <div style={{ display: "flex", alignItems: "center" }}>
-              {user.profile == "" ?   <img src={`${profileimage}`} className="ProfileImage" alt="" />   :   (<img src={`${profileimage}`} className="ProfileImage" alt="" />)}
+              {user.profile == "" ?   <img src={`${profileimage}`} className="ProfileImage" alt="" />   :   (<img src={`${user.profile}`} className="ProfileImage" alt="" />)}
             
               <div>
                 <p style={{ marginLeft: "5px", textAlign: "start" }}>{user.username}</p>
