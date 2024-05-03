@@ -193,5 +193,56 @@ router.get("/post/user/details/:id", async (req, res) => {
   }
 })
 
+//getting user to follow
+
+// router.get('/all/user/', verifyToken, async(req, res) => {
+//   try {
+//    const allUsers = await User.find();
+//   const user = await User.findById(req.user.id);
+  
+//    const followingUser = await Promise.all(user.following.map((item => {
+//     return item
+//    })));
+
+//    let suggestedUsers = allUsers.filter(val =>{
+//     return !followingUser.find(item => {
+//       return val._id === item;
+//     })
+//    })
+
+
+//    let usersTofFollow = await Promise.all(
+//     suggestedUsers.map(item => {
+//       const {email, password, followers, following, ...others} = item._doc; 
+//     })
+//    );
+
+//    res.status(200).json(usersTofFollow);
+//   } catch (error) {
+//     res.status(500).json("Internal server error")
+//   }
+//})
+
+router.get('/all/user/', verifyToken, async (req, res) => {
+  try {
+    const allUsers = await User.find();
+    const user = await User.findById(req.user.id);
+  
+    const followingUserIds = user.following.map(item => item);
+
+    // Filter users who are not being followed by the current user
+    const suggestedUsers = allUsers.filter(val => !followingUserIds.includes(val._id));
+
+    // Send only necessary user data
+    const usersToFollow = suggestedUsers.map(({ email, password, followers, following, ...others }) => ({
+      ...others // Spread the rest of the properties
+    }));
+
+    res.status(200).json(usersToFollow);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 module.exports = router;
