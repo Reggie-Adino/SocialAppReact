@@ -8,10 +8,14 @@ import image4 from "../Images/image4.jpg";
 import image5 from "../Images/image5.jpg";
 import image6 from "../Images/image6.jpg";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Leftbar = () => {
-  const accessToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZDc3YzczNDFlZmE3MzE3MTVhNWQwMiIsInVzZXJuYW1lIjoiam9objkwODEiLCJpYXQiOjE3MTA3NzExMjZ9.lgefVTrf20XIsqkJYfqY0k_A5j2mK5dFGoDwWTNYZ8A";
+  const userDetails = useSelector((state)=>state.user);
+  let user = userDetails?.user
+  console.log(user);
+  let id = user?.other?._id;
+  const accessToken = user.accessToken;
 
 const [post, setPost] = useState([]);
 
@@ -187,7 +191,7 @@ console.log(post);
         <div>
           {post.map((items) =>
             items.map((image) => (
-              <img src={`${image.image}`} className="exploreimage" alt="" />
+              <img src={`${image.image}`} className="exploreimage" alt=""  key={image._id}/>
             ))
           )}
 

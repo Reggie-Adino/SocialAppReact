@@ -20,7 +20,7 @@ router.post(
       return response.status(400).json("Some error occured");
     }
     try {
-      let user = await User.findOne({ email: req.body.email });
+      let user = await User.findOne({ email: req.body.email});
 
       if (user) {
         return response
@@ -59,11 +59,6 @@ router.post(
   "/login",
   [body("email").isEmail(), body("password").isLength({ min: 6 })],
   async (req, res) => {
-    // const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-      // return res.status(400).json({ errors: errors.array() });
-    // }
-
     try {
       const user = await User.findOne({ email: req.body.email });
       if (!user) {
@@ -96,27 +91,38 @@ router.post(
 );
 
 //Following
-router.put("/following/:id" , verifyToken , async(req , res)=>{
-  if(req.params.id !== req.body.user){
-      const user = await User.findById(req.params.id);
-      const otheruser = await User.findById(req.body.user);
+router.put("/following/:id", verifyToken, async (req, res) => {
+  try {
+      if (req.params.id !== req.body.user) {
+          const user = await User.findById(req.params.id);
+          const otherUser = await User.findById(req.body.user);
 
-      if(!user.followers.includes(req.body.user)){
-          await user.updateOne({$push:{followers:req.body.user}});
-          await otheruser.updateOne({$push:{following:req.params.id}});
-          return res.status(200).json("User has followed");
-      }else{
-          await user.updateOne({$pull:{followers:req.body.user}});
-          await otheruser.updateOne({$pull:{following:req.params.id}});
-          return res.status(200).json("User has Unfollowed");
+          if (!user || !otherUser) {
+              return res.status(404).json({ error: "User not found" });
+          }
+
+          if (!user.followers.includes(req.body.user)) {
+              await user.updateOne({ $push: { followers: req.body.user }});
+              console.log(req.body.user,"__req.body.user___");
+              await otherUser.updateOne({ $push: {following: req.params.id }});
+              return res.status(200).json("User has followed");
+          } else {
+              await user.updateOne({ $pull: { followers: req.body.user } });
+              await otherUser.updateOne({ $pull: { following: req.params.id }});
+              return res.status(200).json("User has unfollowed");
+          }
+      } else {
+          return res.status(400).json("You can't follow yourself");
       }
-  }else{
-      return res.status(400).json("You can't follow yourself")
+  } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ error: "Internal server error" });
   }
-})
+});
 
-//Fetch post from followers
-router.get("/flw/:id", verifyToken,async(req, res) => {
+
+//Fetch post from following
+router.get("/flw/:id",verifyToken,async(req, res) => {
  try {
   const user = await User.findById(req.params.id)
   const followrsPost = await Promise.all(
@@ -186,63 +192,67 @@ router.get("/post/user/details/:id", async (req, res) => {
     if(!user) {
       return res.status(400).json("User not found")
     }
-    const {email, password, phonenumber, following, followers, ...others} = user._doc
-    res.status(200).json(others);
+    const {email, password, phonenumber, ...others} = user._doc
+    res.status(200).json(others)
   } catch (error) {
     res.status(500).json("Internal server error")
   }
 })
 
 //getting user to follow
-
-// router.get('/all/user/', verifyToken, async(req, res) => {
-//   try {
-//    const allUsers = await User.find();
-//   const user = await User.findById(req.user.id);
-  
-//    const followingUser = await Promise.all(user.following.map((item => {
-//     return item
-//    })));
-
-//    let suggestedUsers = allUsers.filter(val =>{
-//     return !followingUser.find(item => {
-//       return val._id === item;
-//     })
-//    })
-
-
-//    let usersTofFollow = await Promise.all(
-//     suggestedUsers.map(item => {
-//       const {email, password, followers, following, ...others} = item._doc; 
-//     })
-//    );
-
-//    res.status(200).json(usersTofFollow);
-//   } catch (error) {
-//     res.status(500).json("Internal server error")
-//   }
-//})
-
-router.get('/all/user/', verifyToken, async (req, res) => {
+router.get('/all/user/:id', async(req, res) => {
   try {
-    const allUsers = await User.find();
-    const user = await User.findById(req.user.id);
+   const allUsers = await User.find();
+  const user = await User.findById(req.params.id);
   
-    const followingUserIds = user.following.map(item => item);
+   const followingUser = await Promise.all(user.following.map((item => {
+    return item
+   })));
 
-    // Filter users who are not being followed by the current user
-    const suggestedUsers = allUsers.filter(val => !followingUserIds.includes(val._id));
+   let suggestedUsers = allUsers.filter(val =>{
+    return !followingUser.find(item => {
+      return val._id.toString() === item;
+    })
+   })
 
-    // Send only necessary user data
-    const usersToFollow = suggestedUsers.map(({ email, password, followers, following, ...others }) => ({
-      ...others // Spread the rest of the properties
-    }));
+   const usersToFollow = await Promise.all(
+    suggestedUsers.map(item => {
+      const {email, password, followers, following, ...others} = item._doc; 
+        return others
+    })
+   );
 
-    res.status(200).json(usersToFollow);
+   res.status(200).json(usersToFollow);
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json("Internal server error")
   }
-});
+})
+
+// router.get('/all/user', verifyToken, async (req, res) => {
+//   try {
+//     const allUsers = await User.find();
+//     const user = await User.findById(req.user.id);
+  
+//     const followingUserIds = await Promise.all(user.following.map(item => item));
+
+//     // Filter users who are not being followed by the current user
+//     const suggestedUsers = allUsers.filter(val => !followingUserIds.includes(val._id));
+
+//     // Send only necessary user data
+//     //const usersToFollow = suggestedUsers.map(({ email, password, followers, following, ...others }) => ({
+//       //...others._doc // Spread the rest of the properties
+//     //}));
+
+//     const usersToFollow = suggestedUsers.map(({ email, password, followers, following, ...others }) => ({
+//       ...others._doc // Spread the rest of the properties
+//     }));
+
+//     res.status(200).json(usersToFollow);
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
+
 
 
 module.exports = router;

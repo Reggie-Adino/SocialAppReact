@@ -9,8 +9,8 @@ dotenv.config()
 
 mongoose.connect(process.env.MONGODB).then(() => {
   console.log("Connected to mongo db")
-}).catch(() => {
-  console.log("Some error occured")
+}).catch((err) => {
+  console.log("Some error occured", err)
 })
 app.use(cors())
 app.use(express.json());

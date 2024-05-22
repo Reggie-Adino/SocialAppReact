@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
-import "./post.css";
+import "./post.css"
 import profileimage from "../Images/Profile.png";
 import LikeIcon from "../Images/like.png";
 import commentIcon from "../Images/speech-bubble.png";
 import moreIcon from "../Images/more.png";
 import shareIcon from "../Images/share.png";
 import anotherLikeIcon from "../Images/setLike.png";
-import axios from 'axios'
+import axios from 'axios';
+import { useSelector } from "react-redux";
 
-const         Post = ({post}) => {
+const Post = ({post}) => {
 
+  const userDetails = useSelector((state)=>state.user);
+  let userr = userDetails?.user
 
+console.log(post)
 
 
   const [user, setUser] = useState([]);
@@ -34,21 +38,21 @@ const         Post = ({post}) => {
   const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZDc3YzczNDFlZmE3MzE3MTVhNWQwMiIsInVzZXJuYW1lIjoiam9objkwODEiLCJpYXQiOjE3MTA3NzExMjZ9.lgefVTrf20XIsqkJYfqY0k_A5j2mK5dFGoDwWTNYZ8A"
 
   const [like, setLike] = useState(post.like.includes(userId) ? anotherLikeIcon : LikeIcon);
-  const [count, setCount] = useState(post.like.length);
+  const [count, setCount] = useState(0);
 
     const [comments, setComments] = useState([])
     const [commentwriting, setCommentWriting] = useState('')
     const [show, setShow] = useState(false);
     console.log(post)
 
-  // function handleLike() {
-  //   setLike((prev) => !prev);
-  //   if (!like) {
-  //     setCount(count + 1);
-  //   } else {
-  //     setCount(count - 1);
-  //   }
-  // }
+//   function handleLike() {
+//     setLike((prev) => !prev);
+//     if (!like) {
+//       setCount(count + 1);
+//     } else {
+//       setCount(count - 1);
+//     }
+//   }
 
 
 
@@ -65,14 +69,14 @@ const         Post = ({post}) => {
     }
   }
 
-  const addComment = () => {
+  const addComment = async() => {
     const comment = {
-        "id":"47438834bbcbscbs4774",
-        "username":"suman",
-        "title":`${commentwriting}`
+        "username":userr.other.username,
+        "comment":`${commentwriting}`,
+        "postid":"post._id"
     }
-
-    setComments(comments.concat(comment))
+    await fetch(`http://localhost:5000/api/post/comment/post` ,{method:"PUT", headers:{'Content-Type':"application/Json" , token:accessToken,body:JSON.stringify(comment)}});
+    setComments(comments.push(comment));
   }
 
   const handleComment = ({post}) => {
@@ -132,12 +136,12 @@ const         Post = ({post}) => {
                   }}
                 >
                   <img
-                    src={`${like ? anotherLikeIcon : LikeIcon}`}
+                    src={`${ LikeIcon}`}
                     className="iconsforPost"
                     alt=""
-                    onClick={handleLike}
+                
                   />
-                  <p style={{ marginLeft: "6px" }}>{count} Likes</p>
+                  <p style={{ marginLeft: "6px" }}>{0} Likes</p>
                 </div>
               </div>
               <div style={{ display: "flex", marginLeft: "10px" }}>
@@ -149,7 +153,7 @@ const         Post = ({post}) => {
                   }}
                 >
                   <img src={`${commentIcon}`} className="iconsforPost" alt="" onClick={handleShow} />
-                  <p style={{ marginLeft: "6px" }}>{post.comments.length} comments</p>
+                  <p style={{ marginLeft: "6px" }}>0 comments</p>
                 </div>
               </div>
 

@@ -15,7 +15,7 @@ const Profile = () => {
         <ProfileRightBar />
       </div>
     </div>
-  )
+  ) 
 }
 
 export default Profile

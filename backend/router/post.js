@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../Modals/post");
+const User = require("../Modals/users");
 const { verifyToken } = require("./verifytoken");
-const { findByIdAndUpdate } = require("../Modals/users");
 
 //create Post
 router.post("/user/post", verifyToken,   async(req, res) => {
@@ -22,16 +22,15 @@ router.post("/user/post", verifyToken,   async(req, res) => {
   }
 })
 
-
 // upload post by one user
   
-router.get("/get/post", verifyToken, async (req, res) => {
+router.get("/get/post/:id", async (req, res) => {
           try {
-              const myPost = await Post.find({user:req.user.id})
+              const myPost = await Post.find({user:req.params.id})
               if(!myPost) {
                 return res.status(200).json("You don't have any post")
               }
-              return res.status(200).json(mypost)
+              return res.status(200).json(myPost)
           } catch (error) {
             res.status(500).json("Internal server error")
           }
@@ -128,7 +127,8 @@ router.put("/comment/post", verifyToken, async (req, res) => {
     const comments = {
       user:req.user.id,
       username: req.user.username,
-      comment
+      comment,
+      postid
     }
 
     const post = await Post.findById(postid);
@@ -156,5 +156,54 @@ router.delete("/delete/post/:id", verifyToken, async (req, res) => {
 })
 
 
+/// Get Following users
+router.get("/following/:id", async(req , res)=>{
+  try {
+    const user = await User.findById(req.params.id);
+    const followinguser = await Promise.all(
+          user.following.map((item)=>{
+                return User.findById(item)
+          })
+    )
+
+    let followingList=[];
+    followinguser.map((person)=>{
+          const {email, password , phonenumber , following , followers , ...others} = person._doc;
+          followingList.push(others);
+    })
+
+    res.status(200).json(followingList);
+  } catch (error) {
+       return res.status(500).json("Internal server error")
+  }
+})
+
+/// Get followers
+router.get("/followers/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const followersuser = await Promise.all(
+      user.followers.map((item) => {
+        return User.findById(item);
+        // try this if same results
+        //return User.find({user:item})
+      })
+    );
+
+    const followersList = followersuser.map((person) => {
+      const { email, password, phonenumber, following, followers, ...others } = person._doc;
+      return others;
+    });
+
+    res.status(200).json(followersList);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 module.exports = router;

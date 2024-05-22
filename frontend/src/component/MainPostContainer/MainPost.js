@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import "./mainpost.css";
 import ContentPost from "../ContentPostContainer/ContentPost.js";
-import Post from "../PostContainer/Post.js";
+import Post from "../ProfileMainContainer/Post.js";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const MainPost = () => {
-  const accessToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ZDc3YzczNDFlZmE3MzE3MTVhNWQwMiIsInVzZXJuYW1lIjoiam9objkwODEiLCJpYXQiOjE3MTA3NzExMjZ9.lgefVTrf20XIsqkJYfqY0k_A5j2mK5dFGoDwWTNYZ8A";
+  
+  const userDetails = useSelector((state)=>state.user);
+  let user = userDetails?.user
+  console.log(user);
+  let id = user?.other?._id;
+
+  const accessToken = user.accessToken;
 
   const [post, setPost] = useState([]);
 
@@ -14,7 +20,7 @@ const MainPost = () => {
     const getPost = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/user/flw/65d77c7341efa731715a5d02`,
+          `http://localhost:5000/api/user/flw/${id}`,
           {
             headers: {
               token: accessToken,
